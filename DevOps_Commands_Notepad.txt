@@ -1,0 +1,194 @@
+
+DevOps Practical Exam - Extended Command Reference
+--------------------------------------------------
+
+=============================
+1. WSL / Ubuntu Setup Commands
+=============================
+
+# Start WSL (Ubuntu)
+wsl
+
+# Update and Upgrade system
+sudo apt update
+sudo apt upgrade -y
+
+# Create a new user and switch to it
+sudo adduser cyborg
+su - cyborg
+
+# Check system info
+uname -a
+lsb_release -a
+
+# List directories and files
+ls -al
+cd /mnt/d
+
+=============================
+2. Ansible Commands
+=============================
+
+# Install Ansible
+sudo apt install ansible -y
+
+# Verify installation
+ansible --version
+
+# Configure inventory file
+sudo nano /etc/ansible/hosts
+
+# Inventory content (example)
+[local]
+localhost ansible_connection=local
+
+# Ping localhost to test
+ansible all -m ping
+
+# Create directory
+ansible all -m file -a "path=/opt/myproject state=directory mode=0755" -b
+
+# Install nginx
+ansible all -m apt -a "name=nginx state=present update_cache=yes" -b
+
+# Start nginx service
+ansible all -m service -a "name=nginx state=started" -b
+
+# Create file with content
+ansible all -m copy -a "dest=/tmp/hello.txt content='Hello from Ansible'" -b
+
+# Add a user
+ansible all -m user -a "name=devuser state=present" -b
+
+# Run playbook
+ansible-playbook deploy.yml --ask-become-pass
+
+=============================
+3. Docker Commands
+=============================
+
+# Install Docker (if needed)
+sudo apt install docker.io -y
+
+# Start & Enable Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Add user to docker group
+sudo usermod -aG docker $USER
+
+# Check version
+docker --version
+
+# Build image
+docker build -t mysite .
+
+# Run container
+docker run -d -p 8080:80 --name webcontainer mysite
+
+# Stop and remove container
+docker stop webcontainer
+docker rm webcontainer
+
+# Remove image
+docker rmi mysite
+
+# List running containers
+docker ps
+
+# List all containers
+docker ps -a
+
+# Show docker images
+docker images
+
+=============================
+4. Git Commands
+=============================
+
+# Set global config
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+
+# Initialize repo
+git init
+
+# Clone repo
+git clone https://github.com/username/repo.git
+
+# Add changes
+git add .
+
+# Commit changes
+git commit -m "message"
+
+# Push to GitHub
+git push -u origin main
+
+# Check status
+git status
+
+# Log of commits
+git log --oneline
+
+# Create and switch branch
+git checkout -b feature/login
+
+# Merge branches
+git merge feature/login
+
+# Delete branch
+git branch -d feature/login
+
+# Show diff
+git diff main..dev
+
+# Revert commit
+git revert <commit-id>
+
+=============================
+5. Jenkins Commands & Tips
+=============================
+
+# Jenkins Pipeline Script (Declarative)
+pipeline {
+    agent any
+    environment {
+        APP_NAME = 'mysite'
+        CONTAINER_NAME = 'webcontainer'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                bat "docker build -t %APP_NAME% ."
+            }
+        }
+        stage('Clean Container') {
+            steps {
+                bat 'docker rm -f %CONTAINER_NAME% || exit 0'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                bat "docker run -d -p 8080:80 --name %CONTAINER_NAME% %APP_NAME%"
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Deployed successfully'
+        }
+        failure {
+            echo 'Deployment failed'
+        }
+    }
+}
+
+# Common Jenkins Tips:
+# - Configure Git plugin
+# - Use "Pipeline from SCM" and select branch "main"
+# - Ensure Docker Desktop is running
+
+=============================
+End of File
+=============================
